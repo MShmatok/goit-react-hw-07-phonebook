@@ -1,21 +1,40 @@
-import { nanoid } from "nanoid";
+import { addNewContactThunk, deleteContactThunk, getAllthunk } from "./thunk";
+import { handleFulfilled, handlePending, handleRejected, handlerAddNewContact, handlerAllProducts, handlerDeleteContact } from "./handlers";
 
 const { createSlice } = require("@reduxjs/toolkit");
 
 const initialState = {
-    contacts: [],
+    contacts: {
+        items: [],
+        isLoading: false,
+        error: null
+    },
     filter: ""
 };
 
 const contactSlice = createSlice({
     name: 'contact',
     initialState,
+
+    extraReducers: (builder) => {
+        builder
+            .addCase(getAllthunk.fulfilled, handlerAllProducts)
+            .addCase(addNewContactThunk.fulfilled, handlerAddNewContact)
+            .addCase(deleteContactThunk.fulfilled, handlerDeleteContact)
+            .addMatcher((action) => action.type.endsWith('/pending'),
+                handlePending
+            )
+            .addMatcher((action) => action.type.endsWith('/rejected'),
+                handleRejected
+            )
+            .addMatcher((action) => action.type.endsWith('/fulfilled'),
+                handleFulfilled
+            )
+    },
     reducers: {
         setFilter: (state, { payload }) => { state.filter = payload },
-        setContacts: (state, { payload }) => {
-            state.contacts.push({ id: nanoid(), ...payload })
-        },
-        deleteContact: (state, { payload }) => { state.contacts = state.contacts.filter((el) => el.id !== payload) },
+
+        deleteContact: (state, { payload }) => { state.contacts.items = state.contacts.items.filter((el) => el.id !== payload) },
     }
 })
 

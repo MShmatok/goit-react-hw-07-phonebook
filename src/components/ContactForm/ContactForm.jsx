@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { ContainerForma, Label } from './ContactForm.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { setContacts } from 'redux/slice';
+import { selectAllContacts } from 'redux/selectors';
+import { addNewContactThunk } from 'redux/thunk';
 
 const ContactForm = () => {
   const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+  const [phone, setPhone] = useState('');
 
-  const contacts = useSelector(state => state.contacts);
+  const items = useSelector(selectAllContacts);
   const dispatch = useDispatch();
 
   const onChange = e => {
@@ -17,8 +18,8 @@ const ContactForm = () => {
         setName(value);
         break;
 
-      case 'number':
-        setNumber(value);
+      case 'phone':
+        setPhone(value);
         break;
 
       default:
@@ -26,25 +27,25 @@ const ContactForm = () => {
     }
   };
 
-  const saveData = data => {
-    let isDuplicate = contacts.find(elem => {
+  const isDuplicate = data => {
+    let isDuplicate = items.find(elem => {
       return elem.name.toLowerCase() === data.name.toLowerCase();
     });
     if (isDuplicate) {
       alert(`${data.name} is alredy in contacts!`);
       return true;
     }
-    dispatch(setContacts(data));
   };
 
   const onSubmit = e => {
     e.preventDefault();
-    if (saveData({ name, number })) {
+    if (isDuplicate({ name, phone })) {
       return;
     }
 
+    dispatch(addNewContactThunk({ name, phone }));
     setName('');
-    setNumber('');
+    setPhone('');
   };
 
   return (
@@ -62,14 +63,14 @@ const ContactForm = () => {
         />
       </Label>
       <Label htmlFor="">
-        Number
+        Phone
         <input
           type="tel"
-          name="number"
+          name="phone"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           required
-          value={number}
+          value={phone}
           onChange={onChange}
         />
       </Label>

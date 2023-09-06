@@ -1,31 +1,19 @@
 import ContactItem from 'components/ContactItem/ContactItem';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from 'redux/slice';
+import { selectorFilteredContacts } from 'redux/selectors';
+import { deleteContactThunk } from 'redux/thunk';
 
 const ContactList = () => {
-  const contacts = useSelector(state => state.contacts);
-  const filter = useSelector(state => state.filter);
+  const filteredContacts = useSelector(selectorFilteredContacts);
   const dispatch = useDispatch();
 
-  const getVisibleContacts = () => {
-    let colectionForRender = contacts.filter(item => {
-      return item.name
-        .trim()
-        .toLocaleLowerCase()
-        .includes(filter.trim().toLocaleLowerCase());
-    });
-
-    return colectionForRender;
-  };
   const handleDelete = id => {
-    dispatch(deleteContact(id));
+    dispatch(deleteContactThunk(id));
   };
-
-  const colectionForRender = getVisibleContacts();
 
   return (
     <ul>
-      {colectionForRender.map(item => (
+      {filteredContacts.map(item => (
         <ContactItem
           key={item.id}
           contact={item}
